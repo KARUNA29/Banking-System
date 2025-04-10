@@ -1,4 +1,4 @@
-//Function to register an employee
+// Function to register an employee
 function registerEmployee() {
     // Get form inputs
     const firstName = document.getElementById("firstName")?.value.trim();
@@ -15,9 +15,21 @@ function registerEmployee() {
         return;
     }
 
+    // Validate email format
+    if (!validateEmail(email)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
+
     // Validate password match
     if (password !== confirmPassword) {
         alert("Passwords do not match. Please try again.");
+        return;
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+        alert("Password must be at least 8 characters long.");
         return;
     }
 
@@ -60,12 +72,11 @@ function registerEmployee() {
 }
 
 // Function to register a customer
-// Function to register a customer
 function registerCustomer() {
     // Get form inputs
     const name = document.getElementById("name")?.value.trim();
-    const account = document.getElementById("account")?.value.trim();
-    const ifsc = document.getElementById("ifsc")?.value.trim();
+    const account = "ACCT" + Math.floor(1000000000 + Math.random() * 9000000000); // Random 10-digit account number
+    const ifsc = "BKID10089";
     const balance = parseFloat(document.getElementById("balance")?.value) || 0;
     const aadhaar = document.getElementById("aadhaar")?.value.trim();
     const pan = document.getElementById("pan")?.value.trim();
@@ -78,39 +89,72 @@ function registerCustomer() {
     const address = document.getElementById("address")?.value.trim();
 
     // Validate required fields
-    if (!name || !account || !ifsc || isNaN(balance) || !aadhaar || !pan || !dob || 
-        !gender || !marital || !email || !contact || !password || !address) {
+    if (!name || !aadhaar || !pan || !dob || !gender || 
+        !marital || !email || !contact || !password || !address) 
+     {
         alert("Please fill in all required fields.");
+        return;
+    }
+
+    // Validate email format
+    if (!validateEmail(email)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    // Validate account number
+    
+
+    // Validate Aadhaar number (12 digits)
+    if (!/^\d{12}$/.test(aadhaar)) {
+        alert("Aadhaar number must be 12 digits.");
+        return;
+    }
+
+    // Validate PAN number
+    if (!/^[A-Z]{5}\d{4}[A-Z]{1}$/.test(pan)) {
+        alert("Please enter a valid PAN number (format: ABCDE1234F).");
+        return;
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+        alert("Password must be at least 8 characters long.");
         return;
     }
 
     // Generate a random customer SSN ID
     const ssnId = "CUST" + Math.floor(100000 + Math.random() * 900000);
 
-    // Create customer object with consistent naming
+    // Create customer object
     const customerDetails = {
-        ssn: ssnId,  // Changed from SSN_ID to ssn for consistency
-        name: name,   // Changed from Name to name
+        ssn: ssnId,
+        name,
         accountNumber: account,
-        ifsc: ifsc,
-        balance: balance,
-        aadhaar: aadhaar,
-        pan: pan,
-        dob: dob,
-        gender: gender,
+        ifsc,
+        balance,
+        aadhaar,
+        pan,
+        dob,
+        gender,
         maritalStatus: marital,
-        email: email,
-        contact: contact,
-        password: password,
-        address: address
+        email,
+        contact,
+        password,
+        address
     };
 
     // Retrieve existing customers or initialize empty array
     let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
-    // Check if customer already exists (by email or account number)
-    if (customers.some(customer => customer.email === email || customer.accountNumber === account)) {
-        alert("Customer already exists with the same email or account number.");
+    // Check if customer already exists
+    if (customers.some(customer => 
+        customer.email === email || 
+        customer.accountNumber === account ||
+        customer.aadhaar === aadhaar ||
+        customer.pan === pan
+    )) {
+        alert("Customer already exists with the same email, account number, Aadhaar, or PAN.");
         return;
     }
 
@@ -133,95 +177,115 @@ function registerCustomer() {
     document.getElementById("customerRegistrationForm").reset();
 }
 
-// Function to handle login for customer
+// Function to handle login for both customer and employee
 function handleLogin(type) {
-    if (type !== "customer") return;
+    let enteredId, enteredPassword, storageKey, idKey, redirectPage;
+    const loginForm = document.getElementById("loginForm");
 
-    const enteredId = document.getElementById("customerId")?.value.trim();
-    const enteredPassword = document.getElementById("customerPassword")?.value.trim();
+    if (type === "customer") {
+        enteredId = document.getElementById("customerId")?.value.trim();
+        enteredPassword = document.getElementById("customerPassword")?.value.trim();
+        storageKey = "customers";
+        idKey = "ssn";
+        redirectPage = "cutdash.html";
+    } else if (type === "employee") {
+        enteredId = document.getElementById("employeeId")?.value.trim();
+        enteredPassword = document.getElementById("employeePassword")?.value.trim();
+        storageKey = "employees";
+        idKey = "id";
+        redirectPage = "empHome.html";
+    } else {
+        return;
+    }
 
+    // Validate inputs
     if (!enteredId || !enteredPassword) {
         alert("Please enter both ID and password");
         return;
     }
 
-    // Retrieve stored customers
-    const customers = JSON.parse(localStorage.getItem("customers")) || [];
+    try {
+        // Retrieve stored data from localStorage
+        const storedData = JSON.parse(localStorage.getItem(storageKey)) || [];
 
-    // Find customer by ssn (previously SSN_ID)
-    const customer = customers.find(c => 
-        (c.ssn === enteredId || c.email === enteredId) && 
-        c.password === enteredPassword
-    );
+        // Find the user
+        const user = storedData.find(user => 
+            (user[idKey] === enteredId || user.email === enteredId) && 
+            user.password === enteredPassword
+        );
 
-    if (customer) {
-        // Store the logged-in customer's ssn in localStorage
-        localStorage.setItem("loggedInCustomerId", customer.ssn);
-        localStorage.setItem("loggedInCustomerName", customer.name);
-        localStorage.setItem("loggedInCustomerBalance", customer.balance);
-        
-        alert("Login successful! Redirecting to dashboard...");
-        window.location.href = "cutdash.html";
-    } else {
-        alert("Invalid credentials! Please try again.");
+        if (user) {
+            // Store logged-in user information
+            if (type === "customer") {
+                localStorage.setItem("loggedInCustomerId", user.ssn);
+                localStorage.setItem("loggedInCustomerName", user.name);
+                localStorage.setItem("loggedInCustomerBalance", user.balance);
+            } else {
+                localStorage.setItem("loggedInEmployeeId", user.id);
+                localStorage.setItem("loggedInEmployeeName", `${user.firstName} ${user.lastName}`);
+            }
+
+            alert("Login successful! Redirecting...");
+            window.location.href = redirectPage;
+        } else {
+            alert("Invalid credentials! Please try again.");
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        alert("An error occurred during login. Please try again.");
     }
 }
 
 // Function to get customer details
 function getCustomerDetails(customerId) {
-    const customers = JSON.parse(localStorage.getItem("customers")) || [];
-    return customers.find(c => 
-        c.ssn === customerId || 
-        c.email === customerId ||
-        c.accountNumber === customerId
-    );
+    try {
+        const customers = JSON.parse(localStorage.getItem("customers")) || [];
+        return customers.find(c => 
+            c.ssn === customerId || 
+            c.email === customerId ||
+            c.accountNumber === customerId
+        );
+    } catch (error) {
+        console.error("Error getting customer details:", error);
+        return null;
+    }
 }
 
 // Function to update customer balance
 function updateCustomerBalance(customerId, amount, isCredit = false) {
-    const customers = JSON.parse(localStorage.getItem("customers")) || [];
-    const customerIndex = customers.findIndex(c => c.ssn === customerId);
-    
-    if (customerIndex !== -1) {
-        const currentBalance = parseFloat(customers[customerIndex].balance) || 0;
-        customers[customerIndex].balance = isCredit ? 
-            (currentBalance + amount).toFixed(2) : 
-            (currentBalance - amount).toFixed(2);
+    try {
+        const customers = JSON.parse(localStorage.getItem("customers")) || [];
+        const customerIndex = customers.findIndex(c => c.ssn === customerId);
         
-        localStorage.setItem("customers", JSON.stringify(customers));
-        return true;
+        if (customerIndex !== -1) {
+            const currentBalance = parseFloat(customers[customerIndex].balance) || 0;
+            customers[customerIndex].balance = isCredit ? 
+                (currentBalance + amount).toFixed(2) : 
+                Math.max(0, (currentBalance - amount)).toFixed(2);
+            
+            localStorage.setItem("customers", JSON.stringify(customers));
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.error("Error updating balance:", error);
+        return false;
     }
-    return false;
+}
+
+// Helper function to validate email format
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
 }
 
 // Event listener for DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function() {
-    // Handle customer registration form submission
-    const customerForm = document.getElementById("customerRegistrationForm");
-    if (customerForm) {
-        customerForm.addEventListener("submit", function(e) {
-            e.preventDefault();
-            registerCustomer();
-        });
-    }
-
-    // Handle login form submission if on login page
-    const loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-        loginForm.addEventListener("submit", function(e) {
-            e.preventDefault();
-            handleLogin("customer");
-        });
-    }
-});
-
-// Event listener for DOMContentLoaded
-document.addEventListener("DOMContentLoaded", function () {
     // Handle employee registration form submission
     const employeeRegistrationForm = document.getElementById("registrationForm");
     if (employeeRegistrationForm) {
-        employeeRegistrationForm.addEventListener("submit", function (event) {
-            event.preventDefault();
+        employeeRegistrationForm.addEventListener("submit", function(e) {
+            e.preventDefault();
             registerEmployee();
         });
     }
@@ -229,57 +293,31 @@ document.addEventListener("DOMContentLoaded", function () {
     // Handle customer registration form submission
     const customerRegistrationForm = document.getElementById("customerRegistrationForm");
     if (customerRegistrationForm) {
-        customerRegistrationForm.addEventListener("submit", function (event) {
-            event.preventDefault();
+        customerRegistrationForm.addEventListener("submit", function(e) {
+            e.preventDefault();
             registerCustomer();
         });
     }
+
+    // Handle login form submission
+    const loginForm = document.getElementById("loginForm");
+    if (loginForm) {
+        loginForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const userType = document.querySelector('input[name="userType"]:checked')?.value;
+            if (userType) {
+                handleLogin(userType);
+            } else {
+                alert("Please select user type (Customer or Employee)");
+            }
+        });
+    }
+
+    // Close success popup when clicking the close button
+    const closePopup = document.getElementById("closePopup");
+    if (closePopup) {
+        closePopup.addEventListener("click", function() {
+            document.getElementById("successPopup").style.display = "none";
+        });
+    }
 });
-
-// Function to handle login for both customer and employee
-function handleLogin(type) {
-    let enteredId, enteredPassword, storageKey, idKey, passwordKey;
-
-    if (type === "customer") {
-        enteredId = document.getElementById("customerId")?.value.trim();
-        enteredPassword = document.getElementById("customerPassword")?.value.trim();
-        storageKey = "customers";
-        idKey = "SSN_ID"; // Customer unique identifier
-        passwordKey = "Password"; // Ensure correct case
-    } else if (type === "employee") {
-        enteredId = document.getElementById("employeeId")?.value.trim();
-        enteredPassword = document.getElementById("employeePassword")?.value.trim();
-        storageKey = "employees";
-        idKey = "id"; // Employee unique identifier
-        passwordKey = "password"; // Ensure correct case
-    }
-
-    // Retrieve stored data from localStorage
-    let storedData = JSON.parse(localStorage.getItem(storageKey)) || [];
-
-    console.log("🔍 Stored Data:", storedData);
-    console.log("🆔 Entered ID:", enteredId);
-    console.log("🔑 Entered Password:", enteredPassword);
-
-    // Find the user in the stored data
-    let user = storedData.find(user =>
-        user[idKey] === enteredId && user[passwordKey] === enteredPassword
-    );
-
-    if (user) {
-        console.log("✅ User Found:", user);
-        alert("Login successful! Redirecting...");
-
-        // Store the logged-in customer's SSN_ID in localStorage
-        if (type === "customer") {
-            localStorage.setItem("loggedInCustomerId", user.SSN_ID);
-            console.log("Logged-in Customer ID stored:", user.SSN_ID); // Debugging
-        }
-
-        let redirectPage = type === "customer" ? "cutdash.html" : "empHome.html";
-        window.location.href = redirectPage; // Redirect based on user type
-    } else {
-        console.log("❌ User Not Found!");
-        alert("Invalid ID or Password! Please try again.");
-    }
-}
