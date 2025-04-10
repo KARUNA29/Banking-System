@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Portal Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 350px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .login-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .login-options button {
+            padding: 10px 15px;
+            border: none;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .login-options button:hover {
+            background: #0056b3;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .toggle-link {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Bank Portal</h2>
+
+        <div class="login-options">
+            <button onclick="showForm('customerLogin')">Customer Login</button>
+            <button onclick="showForm('employeeLogin')">Employee Login</button>
+        </div>
+
+<div id="customerLogin" class="form-container">
+    <h3>Customer Login</h3>
+    <input type="text" id="customerId" placeholder="Customer ID" required>
+    <input type="password" id="customerPassword" placeholder="Password" required>
+    <button onclick="handleLogin('customer')">Login</button>
+    <a href="custreg.html" class="toggle-link">New Customer? Register here</a>
+</div>
+
+<div id="employeeLogin" class="form-container">
+    <h3>Employee Login</h3>
+    <input type="text" id="employeeId" placeholder="Employee ID" required>
+    <input type="password" id="employeePassword" placeholder="Password" required>
+    <button onclick="handleLogin('employee')">Login</button>
+    <a href="empreg.html" class="toggle-link">New Employee? Register here</a>
+</div>
+    </div>
+
+    <script>
+        function showForm(formType) {
+            let forms = document.getElementsByClassName("form-container");
+            for (let i = 0; i < forms.length; i++) {
+                forms[i].style.display = "none";
+            }
+            document.getElementById(formType).style.display = "block";
+        }
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html>

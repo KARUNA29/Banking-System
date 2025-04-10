@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Management</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1200px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .no-loans {
+            text-align: center;
+            color: #e74c3c;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #2980b9;
+        }
+
+        .action-button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .approve-button {
+            background: #28a745;
+            color: white;
+        }
+
+        .approve-button:hover {
+            background: #218838;
+        }
+
+        .reject-button {
+            background: #dc3545;
+            color: white;
+        }
+
+        .reject-button:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Loan Management</h2>
+        <table id="loanTable">
+            <thead>
+                <tr>
+                    <th>Customer SSN</th>
+                    <th>Customer Name</th>
+                    <th>Loan Amount</th>
+                    <th>Loan Duration (Months)</th>
+                    <th>Loan Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated dynamically -->
+            </tbody>
+        </table>
+        <p id="noLoansMessage" class="no-loans" style="display: none;">No loan requests found.</p>
+        <a href="empHome.html" class="back-button">Back to Dashboard</a>
+    </div>
+
+    <script>
+        // Function to fetch and display all loan requests
+        function displayAllLoans() {
+            // Retrieve loan requests from localStorage
+            const loanRequests = JSON.parse(localStorage.getItem("loanRequests")) || [];
+
+            const tableBody = document.querySelector("#loanTable tbody");
+            const noLoansMessage = document.getElementById("noLoansMessage");
+
+            if (loanRequests.length > 0) {
+                // Populate the table with loan data
+                loanRequests.forEach((loan, index) => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${loan.ssn}</td>
+                        <td>${loan.name}</td>
+                        <td>${loan.amount}</td>
+                        <td>${loan.duration}</td>
+                        <td>${loan.loanType}</td>
+                        <td>${loan.status || "Pending"}</td>
+                        <td>
+                            <button class="action-button approve-button" onclick="updateLoanStatus(${index}, 'Approved')">Approve</button>
+                            <button class="action-button reject-button" onclick="updateLoanStatus(${index}, 'Rejected')">Reject</button>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } else {
+                // Show message if no loans are found
+                noLoansMessage.style.display = "block";
+            }
+        }
+
+        // Function to update loan status
+        function updateLoanStatus(index, status) {
+            const loanRequests = JSON.parse(localStorage.getItem("loanRequests")) || [];
+
+            if (loanRequests[index]) {
+                loanRequests[index].status = status; // Update the status
+                localStorage.setItem("loanRequests", JSON.stringify(loanRequests)); // Save back to localStorage
+                alert(`Loan status updated to: ${status}`);
+                window.location.reload(); // Refresh the page to reflect changes
+            }
+        }
+
+        // Display all loan requests when the page loads
+        window.onload = displayAllLoans;
+    </script>
+</body>
+</html>

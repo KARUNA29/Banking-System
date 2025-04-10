@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Registration</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: none;
+            height: 30px;
+            grid-column: span 2;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 300px;
+        }
+
+        .popup img {
+            width: 50px;
+            margin-bottom: 10px;
+        }
+
+        .popup button {
+            background-color: #28a745;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .popup button:hover {
+            background-color: #218838;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Customer Registration</h2>
+        <form id="customerRegistrationForm">
+            <label for="name">Customer Name:</label>
+            <input type="text" id="name" required>
+
+            <label for="ifsc">IFSC Code:</label>
+            <input type="text" id="ifsc" value="BKID20009" readonly>
+
+            <label for="balance">Account Opening Balance:</label>
+            <input type="number" id="balance" min="0" required>
+
+            <label for="aadhaar">Aadhaar Card No.:</label>
+            <input type="text" id="aadhaar" maxlength="12" required>
+
+            <label for="pan">PAN Card No.:</label>
+            <input type="text" id="pan" maxlength="10" required>
+
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" required>
+
+            <label for="gender">Gender:</label>
+            <select id="gender" required>
+                <option value="" disabled selected>Select an option</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="marital">Marital Status:</label>
+            <select id="marital" required>
+                <option value="" disabled selected>Select an option</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+            </select>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+
+            <label for="contact">Contact Number:</label>
+            <input type="tel" id="contact" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" required>
+
+            <label for="address" class="full-width">Address:</label>
+            <textarea id="address" required></textarea>
+
+            <div id="errorMessages" class="error full-width"></div>
+
+            <button type="submit" class="full-width">Register</button>
+        </form>
+    </div>
+    <div id="successPopup" class="popup">
+        <h3>Registration Successful!</h3>
+        <p>Customer Name: <span id="custNameDisplay"></span></p>
+        <p>IFSC Code: BKID20009</p>
+        <button onclick="closePopup()">OK</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

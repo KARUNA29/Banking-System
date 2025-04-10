@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Status</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 1000px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .status-approved {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .no-loans {
+            text-align: center;
+            color: #e74c3c;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Loan Status</h2>
+        <table id="loanTable">
+            <thead>
+                <tr>
+                    <th>Loan ID</th>
+                    <th>Loan Amount</th>
+                    <th>Loan Duration (Months)</th>
+                    <th>Loan Type</th>
+                    <th>Status</th>
+                    <th>Date Applied</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated dynamically -->
+            </tbody>
+        </table>
+        <p id="noLoansMessage" class="no-loans" style="display: none;">No loan requests found for this customer.</p>
+        <a href="cutdash.html" class="back-button">Back to Dashboard</a>
+    </div>
+
+    <script>
+        // Function to credit loan amount to customer balance
+        function creditLoanToBalance(customerId, loanAmount) {
+            const customers = JSON.parse(localStorage.getItem("customers")) || [];
+            const customerIndex = customers.findIndex(c => 
+                c.ssn === customerId || 
+                c.SSN_ID === customerId ||
+                c.id === customerId
+            );
+            
+            if (customerIndex !== -1) {
+                const currentBalance = parseFloat(customers[customerIndex].balance || 0);
+                customers[customerIndex].balance = (currentBalance + parseFloat(loanAmount)).toFixed(2);
+                localStorage.setItem("customers", JSON.stringify(customers));
+                return true;
+            }
+            return false;
+        }
+
+        // Function to fetch and display loan requests for the logged-in customer
+        function displayLoanStatus() {
+            const loggedInCustomerId = localStorage.getItem("loggedInCustomerId");
+
+            if (!loggedInCustomerId) {
+                alert("No customer logged in. Please log in.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Retrieve loan requests from localStorage
+            const loanRequests = JSON.parse(localStorage.getItem("loanRequests")) || [];
+
+            // Filter loan requests for the logged-in customer
+            const customerLoans = loanRequests.filter(loan => loan.ssn === loggedInCustomerId);
+
+            const tableBody = document.querySelector("#loanTable tbody");
+            const noLoansMessage = document.getElementById("noLoansMessage");
+
+            // Clear previous results
+            tableBody.innerHTML = "";
+
+            if (customerLoans.length > 0) {
+                // Process each loan
+                customerLoans.forEach(loan => {
+                    const row = document.createElement("tr");
+
+                    // Check if loan was just approved and needs processing
+                    if (loan.status === "Approved" && !loan.processed) {
+                        if (creditLoanToBalance(loggedInCustomerId, loan.amount)) {
+                            // Mark loan as processed
+                            loan.processed = true;
+                            localStorage.setItem("loanRequests", JSON.stringify(loanRequests));
+                            
+                            // Show success message
+                            alert(`Loan amount of ${loan.amount} has been credited to your account!`);
+                        }
+                    }
+
+                    // Determine status class
+                    let statusClass = "status-pending";
+                    if (loan.status === "Approved") statusClass = "status-approved";
+                    if (loan.status === "Rejected") statusClass = "status-rejected";
+
+                    row.innerHTML = `
+                        <td>${loan.loanId || "N/A"}</td>
+                        <td>${loan.amount}</td>
+                        <td>${loan.duration}</td>
+                        <td>${loan.loanType}</td>
+                        <td class="${statusClass}">${loan.status || "Pending"}</td>
+                        <td>${loan.applicationDate || "N/A"}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } else {
+                // Show message if no loans are found
+                noLoansMessage.style.display = "block";
+            }
+        }
+
+        // Display loan status when the page loads
+        window.onload = displayLoanStatus;
+    </script>
+</body>
+</html>

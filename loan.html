@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Request Form</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 450px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+            outline: none;
+        }
+
+        input[readonly] {
+            background-color: #f9f9f9;
+            cursor: not-allowed;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .loan-data {
+            margin-top: 25px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            display: none;
+        }
+
+        .loan-data h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            text-align: center;
+            animation: popupFadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes popupFadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .popup p {
+            margin: 0 0 20px;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        .popup button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .popup button:hover {
+            background: #2980b9;
+        }
+
+        .loan-id-display {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Raise Loan Request</h2>
+        <form id="loanForm">
+            <label for="ssn">Customer SSN:</label>
+            <input type="text" id="ssn" name="ssn" required readonly>
+
+            <label for="name">Customer Name:</label>
+            <input type="text" id="name" name="name" required readonly>
+
+            <label for="occupation">Occupation:</label>
+            <input type="text" id="occupation" name="occupation" required>
+
+            <label for="amount">Loan Amount:</label>
+            <input type="number" id="amount" name="amount" required min="1">
+
+            <label for="duration">Loan Duration (in months):</label>
+            <input type="number" id="duration" name="duration" required min="1">
+
+            <label for="loanType">Loan Type:</label>
+            <select id="loanType" name="loanType" required>
+                <option value="" disabled selected>Select loan type</option>
+                <option value="Personal">Personal</option>
+                <option value="Home">Home</option>
+                <option value="Car">Car</option>
+                <option value="Education">Education</option>
+            </select>
+
+            <button type="submit">Submit</button>
+            <a href="cutdash.html" class="back-button">Back to Dashboard</a>
+        </form>
+
+        <!-- Loan ID Display -->
+        <div id="loanIdDisplay" class="loan-id-display" style="display: none;">
+            Loan ID: <span id="displayedLoanId"></span><br>
+            Date Applied: <span id="displayedLoanDate"></span>
+        </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <p>✅ Loan request submitted successfully!</p>
+        <button onclick="closePopup()">OK</button>
+    </div>
+
+    <script>
+        // Function to generate a random loan ID
+        function generateLoanId() {
+            return "LID" + Math.floor(10000 + Math.random() * 90000);
+        }
+
+        // Function to get current date in YYYY-MM-DD format
+        function getCurrentDate() {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
+        }
+
+        // Function to populate customer details
+        function populateCustomerDetails() {
+            const loggedInCustomerId = localStorage.getItem("loggedInCustomerId");
+
+            if (loggedInCustomerId) {
+                const customers = JSON.parse(localStorage.getItem("customers")) || [];
+                const loggedInCustomer = customers.find(customer => 
+                    customer.SSN_ID === loggedInCustomerId || 
+                    customer.ssn === loggedInCustomerId
+                );
+
+                if (loggedInCustomer) {
+                    document.getElementById("ssn").value = loggedInCustomer.SSN_ID || loggedInCustomer.ssn;
+                    document.getElementById("name").value = loggedInCustomer.Name || loggedInCustomer.name;
+                } else {
+                    alert("Customer not found. Please log in again.");
+                    window.location.href = "login.html";
+                }
+            } else {
+                alert("No customer logged in. Please log in.");
+                window.location.href = "login.html";
+            }
+        }
+
+        // Populate customer details when the page loads
+        window.onload = populateCustomerDetails;
+
+        // Form submission event listener
+        document.getElementById("loanForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const ssn = document.getElementById("ssn").value;
+            const name = document.getElementById("name").value;
+            const occupation = document.getElementById("occupation").value;
+            const amount = parseFloat(document.getElementById("amount").value);
+            const duration = parseInt(document.getElementById("duration").value);
+            const loanType = document.getElementById("loanType").value;
+            const loanId = generateLoanId();
+            const applicationDate = getCurrentDate();
+
+            if (isNaN(amount)) {
+                alert("Please enter a valid loan amount");
+                return;
+            }
+
+            if (isNaN(duration)) {
+                alert("Please enter a valid loan duration");
+                return;
+            }
+
+            const loanRequest = {
+                loanId,
+                ssn,
+                name,
+                occupation,
+                amount,
+                duration,
+                loanType,
+                applicationDate,
+                status: "Pending",
+                processed: false,
+                timestamp: new Date().toLocaleString()
+            };
+
+            const existingLoans = JSON.parse(localStorage.getItem("loanRequests")) || [];
+            existingLoans.push(loanRequest);
+            localStorage.setItem("loanRequests", JSON.stringify(existingLoans));
+
+            // Display the loan ID and application date
+            document.getElementById("displayedLoanId").textContent = loanId;
+            document.getElementById("displayedLoanDate").textContent = applicationDate;
+            document.getElementById("loanIdDisplay").style.display = "block";
+
+            showPopup();
+        });
+
+        // Function to show popup
+        function showPopup() {
+            const popup = document.getElementById("popup");
+            popup.style.display = "block";
+        }
+
+        // Function to close popup
+        function closePopup() {
+            const popup = document.getElementById("popup");
+            popup.style.display = "none";
+            // Don't refresh the page so the loan ID remains visible
+        }
+    </script>
+</body>
+</html>

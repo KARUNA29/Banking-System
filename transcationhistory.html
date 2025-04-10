@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction History</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn i {
+            margin-right: 8px;
+        }
+
+        .balance-info {
+            padding: 20px 40px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .current-balance {
+            font-size: 18px;
+        }
+
+        .balance-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .transaction-grid {
+            padding: 20px 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f5f7fa;
+        }
+
+        .credit {
+            color: #27ae60;
+            font-weight: 500;
+        }
+
+        .debit {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        .loan {
+            color: #3498db;
+            font-weight: 500;
+        }
+
+        .no-transactions {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #3498db;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #e74c3c;
+        }
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spin {
+            animation: spin 1.5s linear infinite;
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>Transaction History</h1>
+            <button class="back-btn" onclick="window.location.href='cutdash.html'">
+                <i class="material-icons">arrow_back</i>
+                Back to Dashboard
+            </button>
+        </div>
+
+        <div class="balance-info">
+            <div class="current-balance">Current Balance:</div>
+            <div class="balance-amount" id="currentBalance">$0.00</div>
+        </div>
+
+        <div class="transaction-grid">
+            <div id="loading" class="loading">
+                <i class="material-icons spin">refresh</i>
+                <p>Loading transactions...</p>
+            </div>
+            
+            <table id="transactionsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionsBody">
+                    <!-- Transactions will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+            
+            <div id="noTransactions" class="no-transactions" style="display: none;">
+                No transactions found for this account.
+            </div>
+            
+            <div id="error" class="error" style="display: none;">
+                <i class="material-icons">error</i>
+                <p id="errorMessage">Failed to load transactions</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(amount || 0);
+        }
+
+        // Function to load transactions
+        function loadTransactions() {
+            try {
+                // Show loading state
+                document.getElementById("loading").style.display = "block";
+                document.getElementById("transactionsTable").style.display = "none";
+                document.getElementById("noTransactions").style.display = "none";
+                document.getElementById("error").style.display = "none";
+                
+                // Get the logged in customer ID
+                const loggedInCustomerId = localStorage.getItem("loggedInCustomerId");
+                
+                if (!loggedInCustomerId) {
+                    throw new Error("No customer logged in");
+                }
+                
+                // Get customer data
+                const customers = JSON.parse(localStorage.getItem("customers")) || [];
+                const customer = customers.find(c => 
+                    c.ssn === loggedInCustomerId || 
+                    c.SSN_ID === loggedInCustomerId ||
+                    c.id === loggedInCustomerId
+                );
+                
+                if (!customer) {
+                    throw new Error("Customer not found");
+                }
+                
+                // Display current balance
+                document.getElementById("currentBalance").textContent = 
+                    formatCurrency(customer.balance || 0);
+                
+                // Get regular transactions
+                const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+                
+                // Get loan transactions
+                const loans = JSON.parse(localStorage.getItem("loans")) || [];
+                
+                // Combine both types of transactions
+                const allTransactions = [];
+                
+                // Add regular transactions
+                transactions.filter(t => t.customerSSN === loggedInCustomerId)
+                    .forEach(t => {
+                        allTransactions.push({
+                            id: t.transactionId,
+                            date: t.transactionDate,
+                            time: t.transactionTime,
+                            type: t.transactionType,
+                            description: t.transactionMode || 'Transaction',
+                            amount: t.transactionAmount,
+                            isLoan: false
+                        });
+                    });
+                
+                // Add loan transactions
+                loans.filter(l => l.customerSSN === loggedInCustomerId)
+                    .forEach(l => {
+                        // Loan approval transaction
+                        if (l.approvalDate) {
+                            allTransactions.push({
+                                id: `LOAN-${l.loanId}`,
+                                date: l.approvalDate,
+                                time: l.approvalTime || '00:00:00',
+                                type: 'Loan',
+                                description: `Loan Approved (${l.loanType})`,
+                                amount: l.loanAmount,
+                                isLoan: true
+                            });
+                        }
+                        
+                        // Loan payment transactions
+                        if (l.payments && l.payments.length > 0) {
+                            l.payments.forEach(p => {
+                                allTransactions.push({
+                                    id: `LOAN-PAY-${l.loanId}-${p.paymentId}`,
+                                    date: p.paymentDate,
+                                    time: p.paymentTime || '00:00:00',
+                                    type: 'Loan Payment',
+                                    description: `Payment for ${l.loanType} Loan`,
+                                    amount: p.amount,
+                                    isLoan: true
+                                });
+                            });
+                        }
+                    });
+                
+                // Sort all transactions by date and time (newest first)
+                allTransactions.sort((a, b) => {
+                    const dateA = new Date(`${a.date} ${a.time}`);
+                    const dateB = new Date(`${b.date} ${b.time}`);
+                    return dateB - dateA;
+                });
+                
+                // Hide loading state
+                document.getElementById("loading").style.display = "none";
+                
+                if (allTransactions.length === 0) {
+                    document.getElementById("noTransactions").style.display = "block";
+                    return;
+                }
+                
+                // Display transactions
+                const transactionsBody = document.getElementById("transactionsBody");
+                transactionsBody.innerHTML = "";
+                
+                allTransactions.forEach(transaction => {
+                    const row = document.createElement("tr");
+                    
+                    // Determine the CSS class based on transaction type
+                    let amountClass = '';
+                    let amountPrefix = '';
+                    
+                    if (transaction.type === 'Credit') {
+                        amountClass = 'credit';
+                        amountPrefix = '+';
+                    } else if (transaction.type === 'Loan') {
+                        amountClass = 'loan';
+                        amountPrefix = '+';
+                    } else if (transaction.type === 'Loan Payment') {
+                        amountClass = 'debit';
+                        amountPrefix = '-';
+                    } else { // Debit
+                        amountClass = 'debit';
+                        amountPrefix = '-';
+                    }
+                    
+                    // Create table cells
+                    row.innerHTML = `
+                        <td>${transaction.id}</td>
+                        <td>${transaction.date}</td>
+                        <td>${transaction.time}</td>
+                        <td>${transaction.type}</td>
+                        <td>${transaction.description}</td>
+                        <td class="${amountClass}">
+                            ${amountPrefix} ${formatCurrency(transaction.amount)}
+                        </td>
+                    `;
+                    
+                    transactionsBody.appendChild(row);
+                });
+                
+                document.getElementById("transactionsTable").style.display = "table";
+                
+            } catch (error) {
+                console.error("Error loading transactions:", error);
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("errorMessage").textContent = error.message;
+                document.getElementById("error").style.display = "block";
+                
+                // If it's an authentication error, redirect to login
+                if (error.message.includes("No customer logged in")) {
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 2000);
+                }
+            }
+        }
+
+        // Load transactions when page loads
+        window.onload = function() {
+            loadTransactions();
+        };
+    </script>
+</body>
+</html>

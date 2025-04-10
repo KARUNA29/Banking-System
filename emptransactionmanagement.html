@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Transaction History</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 1000px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .search-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-section input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-section button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .search-section button:hover {
+            background: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .no-transactions {
+            text-align: center;
+            color: #e74c3c;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Customer Transaction History</h2>
+        <div class="search-section">
+            <input type="text" id="searchSSN" placeholder="Enter Customer SSN ID">
+            <button onclick="searchTransactions()">Search</button>
+        </div>
+
+        <table id="transactionTable">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Transaction Type</th>
+                    <th>Transaction Mode</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Amount</th>
+                    <th>Customer SSN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated dynamically -->
+            </tbody>
+        </table>
+        <p id="noTransactionsMessage" class="no-transactions" style="display: none;">No transactions found for this customer.</p>
+        <a href="empHome.html" class="back-button">Back to Dashboard</a>
+    </div>
+
+    <script>
+        // Function to search for transactions by Customer SSN ID
+        function searchTransactions() {
+            const ssn = document.getElementById("searchSSN").value.trim();
+            const transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+            // Filter transactions for the entered SSN ID
+            const customerTransactions = transactions.filter(transaction => transaction.customerSSN === ssn);
+
+            const tableBody = document.querySelector("#transactionTable tbody");
+            const noTransactionsMessage = document.getElementById("noTransactionsMessage");
+
+            // Clear previous results
+            tableBody.innerHTML = "";
+
+            if (customerTransactions.length > 0) {
+                // Populate the table with transaction data
+                customerTransactions.forEach(transaction => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${transaction.transactionId}</td>
+                        <td>${transaction.transactionType}</td>
+                        <td>${transaction.transactionMode || "N/A"}</td>
+                        <td>${transaction.transactionDate}</td>
+                        <td>${transaction.transactionTime}</td>
+                        <td>${transaction.transactionAmount}</td>
+                        <td>${transaction.customerSSN}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+                // Hide the "No transactions" message
+                noTransactionsMessage.style.display = "none";
+            } else {
+                // Show message if no transactions are found
+                noTransactionsMessage.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>

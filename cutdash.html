@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .user-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff44 0%, #ffffff22 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-name {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-id {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .balance-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            color: #2c3e50;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .balance-title {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #7f8c8d;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #27ae60;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+
+        .nav-item {
+            margin-bottom: 15px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .logout-btn i {
+            margin-right: 8px;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .action-btn i {
+            margin-right: 8px;
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .action-btn.secondary:hover {
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .action-btn.tertiary {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .action-btn.tertiary:hover {
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .action-btn.quaternary {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .action-btn.quaternary:hover {
+            box-shadow: 0 8px 20px rgba(155, 89, 182, 0.4);
+        }
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">?</div>
+                <h2 class="user-name" id="userName">Loading...</h2>
+                <div class="user-id" id="userSSN">SSN ID: Loading...</div>
+                <div class="user-id" id="userAccount">Account #: Loading...</div>
+            </div>
+
+            <div class="balance-card">
+                <div class="balance-title">Available Balance</div>
+                <div class="balance-amount" id="userBalance">$0.00</div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">
+                        <i class="material-icons">dashboard</i>
+                        Dashboard
+                    </a>
+                </li>
+                <!-- Add more menu items here if needed -->
+            </ul>
+
+            <button class="logout-btn" onclick="logout()">
+                <i class="material-icons">logout</i>
+                Logout
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Welcome back, <span id="welcomeName">Customer</span>!</h1>
+                <p class="welcome-subtitle">What would you like to do today?</p>
+            </div>
+
+            <div class="action-buttons">
+                <a href="customertranscations.html" class="action-btn">
+                    <i class="material-icons">payments</i>
+                    Transaction Management
+                </a>
+                <a href="transcationhistory.html" class="action-btn quaternary">
+                    <i class="material-icons">history</i>
+                    Transaction History
+                </a>
+                <a href="loan.html" class="action-btn secondary">
+                    <i class="material-icons">request_quote</i>
+                    Request Loan
+                </a>
+                <a href="loanstatus.html" class="action-btn tertiary">
+                    <i class="material-icons">query_stats</i>
+                    Loan Status
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to handle logout
+        function logout() {
+            // Clear the stored customer ID
+            localStorage.removeItem("loggedInCustomerId");
+            // Redirect to the login page
+            window.location.href = "login.html";
+        }
+
+        // Function to get the first letter of a name
+        function getFirstLetter(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        // Function to format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(amount || 0);
+        }
+
+        // Function to load customer data
+        function loadCustomerData() {
+            // Get the logged in customer ID
+            const loggedInCustomerId = localStorage.getItem("loggedInCustomerId");
+            
+            if (!loggedInCustomerId) {
+                alert("No customer logged in. Redirecting to login page.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            // Get all customers from localStorage
+            const customers = JSON.parse(localStorage.getItem("customers")) || [];
+            
+            // Find the logged in customer
+            const customer = customers.find(c => 
+                c.ssn === loggedInCustomerId || 
+                c.SSN_ID === loggedInCustomerId ||
+                c.id === loggedInCustomerId ||
+                c.customerId === loggedInCustomerId
+            );
+            
+            if (customer) {
+                // Display customer information
+                const displayName = customer.name || customer.Name || "Customer";
+                document.getElementById("userAvatar").textContent = getFirstLetter(displayName);
+                document.getElementById("userName").textContent = displayName;
+                document.getElementById("welcomeName").textContent = displayName;
+                document.getElementById("userSSN").textContent = `SSN ID: ${loggedInCustomerId}`;
+                document.getElementById("userAccount").textContent = `Account #: ${customer.accountNumber || customer.AccountNumber || 'N/A'}`;
+                document.getElementById("userBalance").textContent = formatCurrency(customer.balance || customer.Balance || 0);
+                
+                // Set avatar background color based on name
+                const colors = ['#3498db', '#2ecc71', '#e74c3c', '#9b59b6', '#f39c12'];
+                const colorIndex = displayName.charCodeAt(0) % colors.length;
+                document.getElementById("userAvatar").style.background = colors[colorIndex];
+            } else {
+                console.error("Customer not found in database");
+                document.getElementById("userSSN").textContent = "SSN ID: Not available";
+                document.getElementById("userAccount").textContent = "Account #: Not available";
+                document.getElementById("userBalance").textContent = formatCurrency(0);
+            }
+        }
+
+        // Load customer data when page loads
+        window.onload = function() {
+            loadCustomerData();
+        };
+    </script>
+</body>
+</html>
