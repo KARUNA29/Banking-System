@@ -40,6 +40,7 @@
         button:hover {
             background: #218838;
         }
+
         /* Success Popup */
         .popup {
             display: none;
@@ -47,15 +48,55 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
+            background: #ffffff;
+            padding: 30px;
+            box-shadow: 0px 0px 20px rgba(0, 128, 0, 0.2);
+            border-radius: 15px;
             text-align: center;
+            z-index: 1000;
+            animation: popupFade 0.3s ease-in-out;
         }
-        .checkmark {
-            font-size: 40px;
-            color: green;
+
+        .popup .checkmark {
+            font-size: 48px;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .popup h3 {
+            color: #28a745;
+            margin: 0 0 10px;
+        }
+
+        .popup p {
+            margin: 5px 0;
+            font-weight: 500;
+        }
+
+        .popup button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .popup button:hover {
+            background-color: #218838;
+        }
+
+        @keyframes popupFade {
+            from {
+                transform: scale(0.8) translate(-50%, -50%);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translate(-50%, -50%);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -89,13 +130,20 @@
         </form>
     </div>
 
-<div id="successPopup" style="display: none;">
-    <h3>Registration Successful!</h3>
-    <p>Employee ID: <span id="empIdDisplay"></span></p>
-    <p>Name: <span id="empNameDisplay"></span></p>
-    <button onclick="closePopup()">OK</button>
-</div>
+    <!-- Success Popup -->
+    <div id="successPopup" class="popup">
+        <div class="checkmark">✔️</div>
+        <h3>Registration Successful!</h3>
+        <p>Employee ID: <span id="empIdDisplay"></span></p>
+        <p>Name: <span id="empNameDisplay"></span></p>
+        <button onclick="redirectToLogin()">OK</button>
+    </div>
 
     <script src="script.js"></script>
+    <script>
+        function redirectToLogin() {
+            window.location.href = "login.html"; // Update this if your login file is differently named
+        }
+    </script>
 </body>
 </html>
