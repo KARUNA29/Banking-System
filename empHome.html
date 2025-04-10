@@ -257,7 +257,6 @@
                         Dashboard
                     </a>
                 </li>
-                
             </ul>
 
             <button class="logout-btn" onclick="logout()">
@@ -294,34 +293,30 @@
     </div>
 
     <script>
-        // Function to handle logout
         function logout() {
-            // Redirect to the login page
+            localStorage.removeItem("loggedInEmployeeId");
+            localStorage.removeItem("loggedInEmployeeName");
             window.location.href = "login.html";
         }
 
-        // Load employee data when page loads
         window.onload = function() {
-            // Get employee data from localStorage
-            const employeeId = localStorage.getItem("employeeId");
-            const employeeName = localStorage.getItem("employeeName");
-            
-            // Update the display with employee information
-            if (employeeName) {
-                document.getElementById("userName").textContent = employeeName;
-                document.getElementById("welcomeName").textContent = employeeName;
+            const employeeId = localStorage.getItem("loggedInEmployeeId");
+            const employeeName = localStorage.getItem("loggedInEmployeeName");
+
+            if (!employeeId || !employeeName) {
+                alert("Session expired. Please log in again.");
+                window.location.href = "login.html";
+                return;
             }
-            
-            if (employeeId) {
-                document.getElementById("employeeId").textContent = `Employee ID: ${employeeId}`;
-            }
-            
-            // Set avatar color based on name
-            if (employeeName) {
-                const colors = ['#3498db', '#2ecc71', '#e74c3c', '#9b59b6', '#f39c12'];
-                const colorIndex = employeeName.charCodeAt(0) % colors.length;
-                document.getElementById("userAvatar").style.background = colors[colorIndex];
-            }
+
+            document.getElementById("userName").textContent = employeeName;
+            document.getElementById("welcomeName").textContent = employeeName;
+            document.getElementById("employeeId").textContent = `Employee ID: ${employeeId}`;
+
+            // Optional avatar color based on name
+            const colors = ['#3498db', '#2ecc71', '#e74c3c', '#9b59b6', '#f39c12'];
+            const colorIndex = employeeName.charCodeAt(0) % colors.length;
+            document.getElementById("userAvatar").style.background = colors[colorIndex];
         };
     </script>
 </body>
